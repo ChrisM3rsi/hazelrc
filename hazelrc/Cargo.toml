@@ -8,6 +8,7 @@ name = "hazelrc"
 path = "src/lib.rs"
 
 [dependencies]
+once_cell = "1.21.3"
 spdlog-rs = "0.4"
 
 
