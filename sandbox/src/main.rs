@@ -1,6 +1,6 @@
 mod sandbox;
 
-use hazelrc::{application::{self, Application}, entry_point};
+use hazelrc::entry_point;
 
 
 fn main() {
