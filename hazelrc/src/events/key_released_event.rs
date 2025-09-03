@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::{
     Event,
     events::{EventCategory, EventType},
@@ -23,5 +25,9 @@ impl Event for KeyReleasedEvent {
 
     fn get_event_category(&self) -> EventCategory {
         EventCategory::INPUT | EventCategory::KEYBOARD
+    }
+    
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

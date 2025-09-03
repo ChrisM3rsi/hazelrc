@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::{events::{EventCategory, EventType}, Event};
 
 #[derive(Debug)]
@@ -22,5 +24,9 @@ impl Event for MouseButtonPressed {
 
     fn get_event_category(&self) -> EventCategory {
         EventCategory::MOUSE | EventCategory::MOUSE_BUTTON
+    }
+    
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }

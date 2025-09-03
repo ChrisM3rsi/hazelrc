@@ -4,4 +4,4 @@ pub mod entry_point;
 pub mod log;
 pub mod events;
 
-pub use events::{Event, KeyPressedEvent};
+pub use events::{Event, KeyPressedEvent, input_handler};

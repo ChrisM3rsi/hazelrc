@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::events::{Event, EventCategory, EventType};
 
 #[derive(Debug)]
@@ -22,6 +24,10 @@ impl Event for KeyPressedEvent  {
     
     fn get_event_category(&self) -> EventCategory {
         EventCategory::INPUT | EventCategory::KEYBOARD
+    }
+    
+    fn as_any(&self) -> &dyn Any {
+        self
     }
     
 }
