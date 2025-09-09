@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 hazelrc = { path = "../hazelrc" }
+spdlog-rs = "0.4"
