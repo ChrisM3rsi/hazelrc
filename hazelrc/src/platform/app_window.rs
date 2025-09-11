@@ -1,56 +1,57 @@
+use std::time::Duration;
+
 use spdlog::trace;
 use winit::{
     application::ApplicationHandler,
+    dpi::LogicalSize,
     event::WindowEvent,
     event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
-    window::{Fullscreen, Window},
+    platform::pump_events::EventLoopExtPumpEvents,
+    window::{Fullscreen, Window, WindowAttributes, WindowId},
 };
 
-use crate::{Event, log::CORE_LOGGER};
+use crate::{Event, KeyPressedEvent, log::CORE_LOGGER};
 
 type EventCallbackFn = Box<dyn FnMut(&dyn Event)>;
 
 pub struct WindowsWindow {
-    // win: Window, //?
     pub title: String,
     pub width: u32,
     pub height: u32,
-    window: Window,
+    window: Option<Window>,
+    event_loop: Option<EventLoop<()>>,
+    event_callback: Option<EventCallbackFn>,
 }
 
 impl ApplicationHandler for WindowsWindow {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        self.window = event_loop
-            .create_window(Window::default_attributes())
-            .unwrap();
+        self.window = Some(event_loop
+            .create_window(Window::default_attributes()
+            .with_title(self.title.clone())
+            .with_inner_size(LogicalSize::new(self.width, self.height))
+        )
+                
+            .unwrap());
     }
 
     fn window_event(
         &mut self,
         event_loop: &ActiveEventLoop,
-        window_id: winit::window::WindowId,
-        event: winit::event::WindowEvent,
+        window_id: WindowId,
+        event: WindowEvent,
     ) {
         match event {
             WindowEvent::CloseRequested => {
-                trace!(logger: CORE_LOGGER, "closing window...");
                 event_loop.exit();
             }
             WindowEvent::RedrawRequested => {
-                // Redraw the application.
-                //
-                // It's preferable for applications that do not render continuously to render in
-                // this event rather than in AboutToWait, since rendering in here allows
-                // the program to gracefully handle redraws requested by the OS.
+                if let Some(callback) = &mut self.event_callback {
+                    callback(&KeyPressedEvent::new(43, Some(false)));
+                }
 
-                // Draw.
-
-                // Queue a RedrawRequested event.
-                //
-                // You only need to call this if you've determined that you need to redraw in
-                // applications which do not always need to. Applications that redraw continuously
-                // can render here instead.
-                self.window.request_redraw();
+               if let Some(window) = &self.window {
+                    window.request_redraw();
+                }
             }
             _ => (),
         }
@@ -63,18 +64,20 @@ impl WindowsWindow {
     }
 
     fn init(title: String, width: u32, height: u32) -> Self {
-        let event_loop = EventLoop::new().unwrap();
-        event_loop.set_control_flow(ControlFlow::Poll);
+        // let event_loop = EventLoop::new().unwrap();
+        // event_loop.set_control_flow(ControlFlow::Poll);
 
-        let window = event_loop
-            .create_window(Window::default_attributes())
-            .unwrap();
+        // let window = event_loop
+        //     .create_window(Window::default_attributes().with_title(title.clone()))
+        //     .unwrap();
 
         WindowsWindow {
             title,
             width,
             height,
-            window,
+            window: None,
+            event_loop: None,
+            event_callback: None,
         }
     }
 }
@@ -85,7 +88,19 @@ impl AppWindow for WindowsWindow {
     }
 
     fn on_update(&self) {
-        // &self.window.
+        // let timeout = Some(Duration::ZERO);
+        // if let Some(mut event_loop) = self.event_loop.take() {
+        //     let _ = event_loop.pump_app_events(timeout, self);
+
+        //      self.event_loop = Some(event_loop);
+        // }
+    }
+
+    fn set_event_callback(&mut self, callback_fn: EventCallbackFn) {
+        self.event_callback = Some(callback_fn);
+    }
+
+    fn run(&self) {
     }
 }
 
@@ -93,5 +108,6 @@ pub trait AppWindow {
     fn create(title: String, width: u32, height: u32) -> Self;
     fn on_update(&self);
 
-    // fn set_event_callback()
+    fn set_event_callback(&mut self, callback_fn: EventCallbackFn);
+    fn run(&self);
 }
